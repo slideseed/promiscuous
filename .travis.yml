@@ -2,7 +2,6 @@ language: ruby
 bundler_args: --without development
 script: bundle exec rspec spec
 before_script:
-  - sudo /etc/init.d/postgresql stop
   - sudo ps -ef | grep postgres
 env: JRUBY_OPTS="--server --debug -J-Xms512m -J-Xmx1024m" TIMEOUT=10
 rvm:
