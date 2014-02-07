@@ -178,5 +178,52 @@ describe Promiscuous do
         end
       end
     end
+    context 'when using many embedded documents in an embedded document' do
+      before { record_callbacks(SubscriberModelEmbeddedEmbedded) }
+      before { run_subscriber_worker! }
+
+      context 'when creating' do
+        it 'calls proper callbacks' do
+          pub = Promiscuous.context { PublisherModelEmbedMany.create(:models_embedded => [{:publisher_model_embedded_embedded => [{ :embedded_embedded_field_1 => 'e1'}]}]) }
+          pub_e1 = pub.models_embedded[0].publisher_model_embedded_embedded[0]
+          eventually { SubscriberModelEmbeddedEmbedded.callbacks(:id => pub_e1.id).should =~ [:create, :save] }
+        end
+      end
+
+      context 'when appending' do
+        it 'calls proper callbacks' do
+          pub = Promiscuous.context { PublisherModelEmbedMany.create(:models_embedded => [{:embedded_field_1 => 'e1'}]) }
+          eventually { SubscriberModelEmbedMany.first.should_not == nil }
+          clear_callbacks
+
+          pub_e2 = Promiscuous.context { pub.models_embedded.create(:embedded_field_1 => 'e2') }
+          eventually { SubscriberModelEmbedded.callbacks(:id => pub_e2.id).should =~ [:create, :save] }
+        end
+      end
+
+      context 'when updating' do
+        it 'calls proper callbacks' do
+          pub = Promiscuous.context { PublisherModelEmbedMany.create(:models_embedded => [{:embedded_field_1 => 'e1'}]) }
+          eventually { SubscriberModelEmbedMany.first.should_not == nil }
+          clear_callbacks
+
+          pub_e1 = pub.models_embedded[0]
+          Promiscuous.context { pub_e1.update_attributes(:embedded_field_1 => 'e1_updated') }
+          eventually { SubscriberModelEmbedded.callbacks(:id => pub_e1.id).should =~ [:update, :save] }
+        end
+      end
+
+      context 'when destroying' do
+        it 'calls proper callbacks' do
+          pub = Promiscuous.context { PublisherModelEmbedMany.create(:models_embedded => [{:embedded_field_1 => 'e1'}]) }
+          eventually { SubscriberModelEmbedMany.first.should_not == nil }
+          clear_callbacks
+
+          pub_e1 = pub.models_embedded[0]
+          Promiscuous.context { pub_e1.destroy }
+          eventually { SubscriberModelEmbedded.callbacks(:id => pub_e1.id).should == [:destroy] }
+        end
+      end
+    end
   end
 end

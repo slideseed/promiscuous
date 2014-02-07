@@ -50,12 +50,26 @@ module ModelsHelper
       include Promiscuous::Publisher
 
       embedded_in :publisher_model_embeds
+      embeds_many :publisher_model_embedded_embedded
 
       field :embedded_field_1
       field :embedded_field_2
       field :embedded_field_3
 
       publish :embedded_field_1, :embedded_field_2, :embedded_field_3
+    end
+
+    define_constant :PublisherModelEmbeddedEmbedded do
+      include Mongoid::Document
+      include Promiscuous::Publisher
+
+      embedded_in :publisher_model_embedded
+
+      field :embedded_embedded_field_1
+      field :embedded_embedded_field_2
+      field :embedded_embedded_field_3
+
+      publish :embedded_embedded_field_1, :embedded_embedded_field_2, :embedded_embedded_field_3
     end
 
     define_constant :PublisherModelEmbeddedChild, PublisherModelEmbedded do
@@ -161,6 +175,8 @@ module ModelsHelper
       include Mongoid::Document
       include Promiscuous::Subscriber
       embedded_in :subscriber_model_embeds
+      embeds_many :subscriber_model_embedded_embedded,
+                  :cascade_callbacks => true
 
       field :embedded_field_1
       field :embedded_field_2
@@ -168,6 +184,19 @@ module ModelsHelper
 
       subscribe :as => :PublisherModelEmbedded
       subscribe :embedded_field_1, :embedded_field_2, :embedded_field_3
+    end
+
+    define_constant :SubscriberModelEmbeddedEmbedded do
+      include Mongoid::Document
+      include Promiscuous::Subscriber
+      embedded_in :subscriber_model_embedded
+
+      field :embedded_embedded_field_1
+      field :embedded_embedded_field_2
+      field :embedded_embedded_field_3
+
+      subscribe :as => :PublisherModelEmbeddedEmbedded
+      subscribe :embedded_embedded_field_1, :embedded_embedded_field_2, :embedded_embedded_field_3
     end
 
     define_constant :SubscriberModelEmbeddedChild, SubscriberModelEmbedded do
