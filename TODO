@@ -1,0 +1,6 @@
+* ActiveRecord eventual consistency
+* Make eventual the default consistency
+* Update docs
+
+* Rip out causal consistency
+* Rip out (super simplify) bootstrapping
